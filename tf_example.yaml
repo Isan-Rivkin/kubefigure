@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: some-svc 
+  annotations:
+    com.kubefigure.watch-changes: true
+    com.kubefigure.terraform.s3: some-bucket-name
+    com.kubefigure.terraform.state.a: state/inside/bucket 
+    svc-dns-addr: !terraform 'a.output.value.aws_alb.hostname'
+spec:
+  ports:
+    - port: 80
+      targetPort: 8125
+      nodePort: !terraform 'a.output.value.aws_alb_target_group.port'
+      protocol: UDP
+  type: NodePort
+  selector:
+    app: some-app
