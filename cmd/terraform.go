@@ -44,11 +44,7 @@ var terraformCmd = &cobra.Command{
 	},
 }
 
-func test1() {
-	bucket := "similarweb-terraform-remote-states"
-	//key := "private/terraform/route53-zones/int-similarweb-io/terraform.tfstate"
-	key := "private/terraform/nomad_agent/us-east-1_production_datacollection/terraform.tfstate"
-	region := "us-east-1"
+func test1(bucket, key, region string) {
 
 	connector := terraform.NewDefaultS3RemoteStateConnector(bucket, key, region)
 
@@ -80,11 +76,7 @@ func test1() {
 	}
 
 }
-func test2() {
-	bucket := "similarweb-terraform-remote-states"
-	//key := "private/terraform/route53-zones/int-similarweb-io/terraform.tfstate"
-	key := "private/terraform/nomad_agent/us-east-1_production_datacollection/terraform.tfstate"
-	region := "us-east-1"
+func test2(bucket, key, region string) {
 
 	connector := terraform.NewDefaultS3RemoteStateConnector(bucket, key, region)
 
@@ -140,11 +132,7 @@ func test2() {
 	}
 }
 
-func test3() {
-	bucket := "similarweb-terraform-remote-states"
-	//key := "private/terraform/route53-zones/int-similarweb-io/terraform.tfstate"
-	key := "private/terraform/nomad_agent/us-east-1_production_datacollection/terraform.tfstate"
-	region := "us-east-1"
+func test3(bucket, key, region string) {
 
 	connector := terraform.NewDefaultS3RemoteStateConnector(bucket, key, region)
 
@@ -208,11 +196,7 @@ func test3() {
 	}
 }
 
-func test4() {
-	bucket := "similarweb-terraform-remote-states"
-	//key := "private/terraform/route53-zones/int-similarweb-io/terraform.tfstate"
-	key := "private/terraform/nomad_agent/us-east-1_production_datacollection/terraform.tfstate"
-	region := "us-east-1"
+func test4(bucket, key, region string) {
 
 	connector := terraform.NewDefaultS3RemoteStateConnector(bucket, key, region)
 
@@ -234,10 +218,11 @@ func test4() {
 
 }
 func runTestsTF() {
-	//test1()
-	//test2()
-	test3()
-	//test4()
+	bucket, key, region := "", "", ""
+	//test1(bucket, key, region )
+	//test2(bucket, key, region )
+	test3(bucket, key, region)
+	//test4(bucket, key, region )
 }
 
 func init() {
@@ -257,7 +242,7 @@ func init() {
 	terraformCmd.PersistentFlags().StringVar(&tfInput.RemoteRegion, "remote-region", "us-east-1", "--remote-region us-east-1")
 	terraformCmd.PersistentFlags().StringVar(&tfInput.StateValuePath, "state-value-path", "", "--state-value-path outputs.elb_sg")
 	terraformCmd.PersistentFlags().BoolVar(&tfInput.StatusOnly, "status-only", true, "--status-only will print the remote value info")
-	
+
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// terraformCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")

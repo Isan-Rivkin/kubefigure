@@ -8,12 +8,12 @@ import (
 	"github.com/isan-rivkin/kubefigure/sources/awsclient"
 )
 
-// data "terraform_remote_state" "int_similarweb_io" {
+// data "terraform_remote_state" "some_state" {
 // 	backend = "s3"
 
 // 	config = {
-// 	  bucket = "similarweb-terraform-remote-states"
-// 	  key    = "private/terraform/route53-zones/int-similarweb-io/terraform.tfstate"
+// 	  bucket = "..."
+// 	  key    = "..."
 // 	  region = "us-east-1"
 // 	}
 //   }
