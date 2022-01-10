@@ -8,3 +8,4 @@ k apply -> mutatingWebHook -> fetch data source -> render -> deploy
 
 * Terraform (S3)
 
+* Vault 
