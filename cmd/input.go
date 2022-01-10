@@ -21,6 +21,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+
+
 // inputCmd represents the input command
 var inputCmd = &cobra.Command{
 	Use:   "input",
