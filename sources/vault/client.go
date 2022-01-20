@@ -10,6 +10,7 @@ import (
 )
 
 type Client interface {
+	ReadAsVal(secretPath, optionalSecretVersion string) (*VaultPayload, error)
 	Read(secretPath, optionalSecretVersion string) (map[string]interface{}, error)
 }
 
