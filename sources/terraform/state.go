@@ -8,16 +8,18 @@ import (
 
 type RemoteStateConnector interface {
 	Download() ([]byte, error)
-	DownloadAsStatefile() (*statefile.File, error)
+	DownloadAsStatefile() (*statefile.File, []byte, error)
 }
 
 type TFState struct {
 	File *statefile.File
+	Raw  []byte
 }
 
-func NewStateFromFile(File *statefile.File) *TFState {
+func NewStateFromFile(File *statefile.File, raw []byte) *TFState {
 	return &TFState{
 		File: File,
+		Raw:  raw,
 	}
 }
 
@@ -53,7 +55,6 @@ func (s *TFState) ListAllResources() []string {
 
 func (s *TFState) OutputsStatus() ([]*OutputStatus, error) {
 	outputs, err := GetOutputsFromStateFile(s.File)
-
 	if err != nil {
 		return nil, fmt.Errorf("failed parsing outputs from state file, Error %v", err)
 	}

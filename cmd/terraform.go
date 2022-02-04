@@ -21,6 +21,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/isan-rivkin/kubefigure/common"
 	"github.com/isan-rivkin/kubefigure/sources/terraform"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -62,7 +63,7 @@ $input terraform --input=input.yaml
 			panic("only s3 supported")
 		}
 
-		if !strings.HasPrefix(tfInput.StateValuePath, "outputs.") {
+		if !strings.HasPrefix(tfInput.StateValuePath, "$.outputs.") {
 			panic("for now, only outputs path")
 		}
 
@@ -90,16 +91,23 @@ $input terraform --input=input.yaml
 		if tfInput.ListAvailableValuePaths {
 			for _, o := range outputs {
 				p := fmt.Sprintf("outputs.%s", o.Key)
-				log.Info(p)
+				log.Debug(p)
 			}
 		}
 
 		for _, o := range outputs {
-			p := fmt.Sprintf("outputs.%s", o.Key)
-			if p == tfInput.StateValuePath {
-				log.Printf(p + ": " + o.Value)
+			if o.Key == tfInput.StateValuePath {
+				log.Debug(o.Key + ": " + o.Value)
 			}
 		}
+		val, err := common.FindValInJson(tfInput.StateValuePath, state.Raw)
+
+		if err != nil {
+			log.WithError(err).Error("failed getting jsonpath from val")
+			os.Exit(1)
+		}
+
+		log.Info(common.ConvertValueToString(val))
 	},
 }
 

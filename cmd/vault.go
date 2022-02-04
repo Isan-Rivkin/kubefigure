@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/isan-rivkin/kubefigure/common"
 	"github.com/isan-rivkin/kubefigure/sources/vault"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -26,9 +27,10 @@ import (
 )
 
 type VaultInput struct {
-	AppRole    string `yaml:"approle"`
-	SecretPath string `yaml:"path"`
-	VaultAddr  string `yaml:"address"`
+	AppRole     string `yaml:"approle"`
+	SecretPath  string `yaml:"path"`
+	ValJsonPath string `yaml:"valpath"`
+	VaultAddr   string `yaml:"address"`
 }
 
 var vltInput *VaultInput = &VaultInput{}
@@ -44,13 +46,19 @@ $input vault --addr=vault.com --approle=123 --path=path/to/secret
 		fmt.Println("vault called")
 		renderVaultInputFile()
 		vClient := vault.NewClientFromApprole(vltInput.VaultAddr, vltInput.AppRole)
-		secret, err := vClient.Read(vltInput.SecretPath, "")
+		secret, err := vClient.ReadAsVal(vltInput.SecretPath, "")
 
 		if err != nil {
 			panic(err)
 		}
 
-		fmt.Println("secret => ", secret)
+		fmt.Println("secret => ", secret.JsonVal.Value.AsValueMap())
+		val, err := common.FindValInJson(vltInput.ValJsonPath, secret.JsonBytes)
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Println("json path secret val =>  ", val.AsString())
 	},
 }
 
@@ -73,5 +81,6 @@ func init() {
 	terraformCmd.PersistentFlags().StringVar(&vltInput.VaultAddr, "address", "", "vault server address")
 	terraformCmd.PersistentFlags().StringVar(&vltInput.AppRole, "approle", "", "approle id for auth method")
 	terraformCmd.PersistentFlags().StringVar(&vltInput.SecretPath, "path", "", "path to secret")
+	terraformCmd.PersistentFlags().StringVar(&vltInput.ValJsonPath, "jsonpath", "", "path to value inside json secret based on json path")
 	vaultCmd.PersistentFlags().StringVar(&fileInput, "input", "", "read input from file")
 }

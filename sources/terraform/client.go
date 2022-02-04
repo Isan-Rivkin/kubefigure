@@ -14,11 +14,11 @@ func NewTerraformClient() TFClient {
 }
 
 func (tc *TerraformClient) GetState(connector RemoteStateConnector) (*TFState, error) {
-	file, err := connector.DownloadAsStatefile()
+	file, raw, err := connector.DownloadAsStatefile()
 
 	if err != nil {
 		return nil, fmt.Errorf("failed downloading state file with connector Error %v", err)
 	}
 
-	return NewStateFromFile(file), nil
+	return NewStateFromFile(file, raw), nil
 }

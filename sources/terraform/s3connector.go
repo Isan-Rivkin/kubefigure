@@ -40,17 +40,17 @@ func NewS3RemoteStateConnector(s3api *awsclient.S3Api, bucket, key, region strin
 	}
 }
 
-func (sc *S3RemoteStateConnector) DownloadAsStatefile() (*statefile.File, error) {
+func (sc *S3RemoteStateConnector) DownloadAsStatefile() (*statefile.File,[]byte,  error) {
 	data, err := sc.Download()
 
 	if err != nil {
-		return nil, err
+		return nil,nil, err
 	}
 
 	reader := bytes.NewReader(data)
 	file, err := statefile.Read(reader)
 
-	return file, err
+	return file,data, err
 }
 
 func (sc *S3RemoteStateConnector) Download() ([]byte, error) {
