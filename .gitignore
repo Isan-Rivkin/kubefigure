@@ -2,3 +2,4 @@ input.yaml
 tf_input.yaml
 vault_input.yaml
 generic_input.yaml
+consul_input.yaml
