@@ -44,11 +44,6 @@ func (v *Vaultclient) secretToVal(secret interface{}) (*ctyjson.SimpleJSONValue,
 	jsonVal := &ctyjson.SimpleJSONValue{
 		Value: val,
 	}
-	// m := jsonVal.AsValueMap()
-	// for k, v := range m {
-	// 	fmt.Println("kkk ", k)
-	// 	fmt.Println("vvv ", v.AsString())
-	// }
 
 	return jsonVal, bytes, nil
 }

@@ -2,13 +2,37 @@ package common
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
 
 	"github.com/zclconf/go-cty/cty"
+	"github.com/zclconf/go-cty/cty/gocty"
 	ctyjson "github.com/zclconf/go-cty/cty/json"
 )
+
+func GetImpliedType(o interface{}) (cty.Type, error) {
+	ty, err := gocty.ImpliedType(o)
+
+	if err == nil {
+		return ty, nil
+	}
+
+	bytes, err := json.Marshal(o)
+
+	if err != nil {
+		return cty.Type{}, fmt.Errorf("failed getting type not json %s", err)
+	}
+
+	ty, err = ctyjson.ImpliedType(bytes)
+
+	if err != nil {
+		return ty, fmt.Errorf("failed getting implied type %s", err)
+	}
+
+	return ty, nil
+}
 
 func ConvertValueToString(val cty.Value) string {
 	return convertValueToString(val)

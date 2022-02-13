@@ -1,5 +1,5 @@
 /*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
+Copyright © 2022 NAME HERE isanrivkin@gmail.com
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/isan-rivkin/kubefigure/common"
+	"github.com/isan-rivkin/kubefigure/sources"
 	"github.com/isan-rivkin/kubefigure/sources/terraform"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -67,50 +68,42 @@ $input terraform --input=input.yaml
 			panic("for now, only outputs path")
 		}
 
-		bucket := tfInput.BackendName
-		key := tfInput.BackendKey
-		region := tfInput.RemoteRegion
-
-		connector := terraform.NewDefaultS3RemoteStateConnector(bucket, key, region)
-
-		tfClient := terraform.NewTerraformClient()
-		state, err := tfClient.GetState(connector)
-
-		if err != nil {
-			log.WithError(err).Error("failed getting state")
-			os.Exit(1)
-		}
-
-		outputs, err := state.OutputsStatus()
-
-		if err != nil {
-			log.WithError(err).Error("failed getting status from state")
-			os.Exit(1)
-		}
-
-		if tfInput.ListAvailableValuePaths {
-			for _, o := range outputs {
-				p := fmt.Sprintf("outputs.%s", o.Key)
-				log.Debug(p)
-			}
-		}
-
-		for _, o := range outputs {
-			if o.Key == tfInput.StateValuePath {
-				log.Debug(o.Key + ": " + o.Value)
-			}
-		}
-		val, err := common.FindValInJson(tfInput.StateValuePath, state.Raw)
-
-		if err != nil {
-			log.WithError(err).Error("failed getting jsonpath from val")
-			os.Exit(1)
-		}
-
-		log.Info(common.ConvertValueToString(val))
+		runWithController()
 	},
 }
 
+func runWithController() {
+	sourcesController := sources.NewDataSourceController()
+	ds, err := sourcesController.GetDataSource(sources.TerraformSource, sources.DataSourceConfig{
+		TerraformConf: &terraform.SourceInput{
+			StorageType: terraform.S3Storage,
+			S3Storage: &terraform.S3StateStorage{
+				Bucket: tfInput.BackendName,
+				Region: tfInput.RemoteRegion,
+			},
+			Value: terraform.StateValueInput{
+				Key:            tfInput.BackendKey,
+				StateValuePath: tfInput.StateValuePath,
+			},
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
+	payload, err := ds.Get()
+	if err != nil {
+		panic(err)
+	}
+	val, err := payload.Value()
+
+	if err != nil {
+		panic(err)
+	}
+
+	strVal := common.ConvertValueToString(val)
+
+	fmt.Println(strVal)
+}
 func renderInputFile() error {
 	yamlFile, err := ioutil.ReadFile(fileInput)
 	if err != nil {

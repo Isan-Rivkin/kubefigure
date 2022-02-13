@@ -1,5 +1,5 @@
 /*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
+Copyright © 2022 NAME HERE isanrivkin@gmail.com
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import (
 	"io/ioutil"
 
 	"github.com/isan-rivkin/kubefigure/common"
+	"github.com/isan-rivkin/kubefigure/sources"
 	"github.com/isan-rivkin/kubefigure/sources/vault"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -45,23 +46,58 @@ $input vault --addr=vault.com --approle=123 --path=path/to/secret
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("vault called")
 		renderVaultInputFile()
-		vClient := vault.NewClientFromApprole(vltInput.VaultAddr, vltInput.AppRole)
-		secret, err := vClient.ReadAsVal(vltInput.SecretPath, "")
+		getVaultWithController()
+		// vClient := vault.NewClientFromApprole(vltInput.VaultAddr, vltInput.AppRole)
+		// secret, err := vClient.ReadAsVal(vltInput.SecretPath, "")
 
-		if err != nil {
-			panic(err)
-		}
+		// if err != nil {
+		// 	panic(err)
+		// }
 
-		fmt.Println("secret => ", secret.JsonVal.Value.AsValueMap())
-		val, err := common.FindValInJson(vltInput.ValJsonPath, secret.JsonBytes)
-		if err != nil {
-			panic(err)
-		}
+		// fmt.Println("secret => ", secret.JsonVal.Value.AsValueMap())
+		// val, err := common.FindValInJson(vltInput.ValJsonPath, secret.JsonBytes)
+		// if err != nil {
+		// 	panic(err)
+		// }
 
-		fmt.Println("json path secret val =>  ", val.AsString())
+		// fmt.Println("json path secret val =>  ", val.AsString())
 	},
 }
 
+func getVaultWithController() {
+	sourcesController := sources.NewDataSourceController()
+	ds, err := sourcesController.GetDataSource(sources.VaultSource, sources.DataSourceConfig{
+		VaultConf: &vault.SourceInput{
+			VaultAddr:     vltInput.VaultAddr,
+			VaultAuthType: vault.ApproleAuthType,
+			Approle: &vault.ApproleAuth{
+				RoleID: vltInput.AppRole,
+			},
+			Secret: vault.SecretInfo{
+				Path:            vltInput.SecretPath,
+				SecretValuePath: vltInput.ValJsonPath,
+			},
+		},
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	payload, err := ds.Get()
+
+	if err != nil {
+		panic(err)
+	}
+
+	val, err := payload.Value()
+	if err != nil {
+		panic(err)
+	}
+
+	log.Info(common.ConvertValueToString(val))
+
+}
 func renderVaultInputFile() error {
 	yamlFile, err := ioutil.ReadFile(fileInput)
 	if err != nil {
@@ -78,9 +114,9 @@ func renderVaultInputFile() error {
 
 func init() {
 	inputCmd.AddCommand(vaultCmd)
-	terraformCmd.PersistentFlags().StringVar(&vltInput.VaultAddr, "address", "", "vault server address")
-	terraformCmd.PersistentFlags().StringVar(&vltInput.AppRole, "approle", "", "approle id for auth method")
-	terraformCmd.PersistentFlags().StringVar(&vltInput.SecretPath, "path", "", "path to secret")
-	terraformCmd.PersistentFlags().StringVar(&vltInput.ValJsonPath, "jsonpath", "", "path to value inside json secret based on json path")
+	vaultCmd.PersistentFlags().StringVar(&vltInput.VaultAddr, "address", "", "vault server address")
+	vaultCmd.PersistentFlags().StringVar(&vltInput.AppRole, "approle", "", "approle id for auth method")
+	vaultCmd.PersistentFlags().StringVar(&vltInput.SecretPath, "path", "", "path to secret")
+	vaultCmd.PersistentFlags().StringVar(&vltInput.ValJsonPath, "jsonpath", "", "path to value inside json secret based on json path")
 	vaultCmd.PersistentFlags().StringVar(&fileInput, "input", "", "read input from file")
 }
