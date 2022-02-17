@@ -48,11 +48,10 @@ var inputCmd = &cobra.Command{
 
 		if err != nil {
 			fmt.Errorf("failed parsing yaml input - %v", err)
-			return
+			panic(err)
 		}
 
 		for _, s := range inputRes.Sources {
-			fmt.Println(s.SourceType)
 			if inputBuilder, found := sourceToInput[sources.SourceType(s.SourceType)]; found {
 				dsInput := inputBuilder(s)
 				ds, err := sourcesController.GetDataSource(sources.SourceType(s.SourceType), dsInput)

@@ -18,4 +18,3 @@ spec:
   type: NodePort
   selector:
     app: some-app
-
