@@ -13,7 +13,7 @@ k apply -> mutatingWebHook -> fetch data source -> render -> deploy
 * Consul
 
 
-# Config example:
+# Usage example:
 
 In terminal run with the file `example.yaml`: 
 
