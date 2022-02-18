@@ -11,8 +11,7 @@ import (
 )
 
 type Source struct {
-	SourceType string `yaml:"sourceType"`
-	//Spec          interface{}            `yaml:"-"`
+	SourceType    string                 `yaml:"sourceType"`
 	TerraformConf *terraform.SourceInput `yaml:"terraform"`
 	VaultConf     *vault.SourceInput     `yaml:"vault"`
 	ConsulConf    *consuls.SourceInput   `yaml:"consul"`

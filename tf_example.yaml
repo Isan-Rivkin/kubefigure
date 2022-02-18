@@ -4,17 +4,18 @@ metadata:
   name: some-svc 
   annotations:
     com.kubefigure.watch-changes: true
+    com.kubefigure.consul.address: consul.http.addr:8500
     com.kubefigure.terraform.s3: some-bucket-name
     com.kubefigure.terraform.state.a: state/inside/bucket 
     svc-dns-addr: !terraform 'a.output.value.aws_alb.hostname'
     svc-dns-addr: !vault 'a.output.value.aws_alb.hostname'
+    dbPassword: !vault a.b.c$dbpwd
 spec:
   ports:
-      dbPassword: !vault a.b.c#dbpwd
     - port: 80
       targetPort: 8125
       nodePort: !terraform 'a.output.value.aws_alb_target_group.port'
       protocol: UDP
   type: NodePort
   selector:
-    app: some-app
+    app: !consulkv 'some/kv/path$app_name[0]'
